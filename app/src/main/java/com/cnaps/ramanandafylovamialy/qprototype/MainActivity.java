@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -47,14 +48,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         listeTypePrestations = new ArrayList<>();
 
         //initialisation des composants visuels
-        select_assuj = (Spinner)findViewById(R.id.select_assuj);
-        select_presta = (Spinner)findViewById(R.id.select_prest);
-        text_age = (EditText)findViewById(R.id.text_age);
-        select_sexe = (Spinner)findViewById(R.id.select_sexe);
-        btn_valider = (Button)findViewById(R.id.btn_valider);
+        select_assuj = findViewById(R.id.select_assuj);
+        select_presta = findViewById(R.id.select_prest);
+        text_age = findViewById(R.id.text_age);
+        select_sexe = findViewById(R.id.select_sexe);
+        btn_valider = findViewById(R.id.btn_valider);
 
-        ServiceHTTP serviceHTTPForAssuj = new ServiceHTTP();
-        serviceHTTPForAssuj.context = this;
+        ServiceHTTP serviceHTTPForAssuj = new ServiceHTTP(this);
         serviceHTTPForAssuj.execute("http://192.168.6.247:3300/Assujettis/ass/list");
         serviceHTTPForAssuj.listener = new OnTaskCompleted() {
             @Override
@@ -70,13 +70,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                         }
                     }
                 }catch (JSONException e){
-
+                    Log.e("erreur", e.getMessage());
                 }
             }
         };
 
-        ServiceHTTP serviceHTTPForPresta = new ServiceHTTP();
-        serviceHTTPForPresta.context = this;
+        ServiceHTTP serviceHTTPForPresta = new ServiceHTTP(this);
         serviceHTTPForPresta.execute("http://192.168.6.247:3300/prest/prest/list");
         serviceHTTPForPresta.listener = new OnTaskCompleted() {
             @Override
@@ -92,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                         }
                     }
                 }catch (JSONException e){
-
+                    Log.e("erreur", e.getMessage());
                 }
             }
         };

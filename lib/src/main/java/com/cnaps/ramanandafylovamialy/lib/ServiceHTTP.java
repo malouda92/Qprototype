@@ -13,9 +13,17 @@ public class ServiceHTTP extends AsyncTask<String, Void, Integer> {
     private ProgressDialog pb = null;
     private int responseCode;
     private BufferedReader reader;
-    public String responseServer;
-    public Context context;
+    private String responseServer;
+    private Context context;
     public OnTaskCompleted listener;
+
+    public ServiceHTTP(){
+
+    }
+
+    public ServiceHTTP(Context context){
+        this.context = context.getApplicationContext();
+    }
 
     @Override
     protected void onPreExecute(){
@@ -35,7 +43,7 @@ public class ServiceHTTP extends AsyncTask<String, Void, Integer> {
             responseCode = connexion.getResponseCode();
             reader = new BufferedReader(new InputStreamReader(connexion.getInputStream()));
             StringBuilder sb =new StringBuilder();
-            String line = "";
+            String line;
             while((line = reader.readLine())!= null){
                 sb.append(line);
             }
