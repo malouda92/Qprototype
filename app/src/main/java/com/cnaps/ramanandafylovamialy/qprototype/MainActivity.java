@@ -12,44 +12,39 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.cnaps.ramanandafylovamialy.lib.Enquete;
+import com.cnaps.ramanandafylovamialy.lib.OnTaskCompleted;
+import com.cnaps.ramanandafylovamialy.lib.ServiceHTTP;
 import com.cnaps.ramanandafylovamialy.lib.TypeAssujettis;
 import com.cnaps.ramanandafylovamialy.lib.TypePrestation;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
-    ArrayList<TypeAssujettis> listeTypeAssujettis = null;
-    ArrayList<TypePrestation> listeTypePrestations = null;
+    ArrayList<TypeAssujettis> listeTypeAssujettis;
+    ArrayList<TypePrestation> listeTypePrestations;
+
     Spinner select_assuj = null;
     Spinner select_presta = null;
     Spinner select_sexe = null;
     Button btn_valider = null;
     Enquete enquete = null;
     EditText text_age = null;
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //initialisation des classes
         listeTypeAssujettis = new ArrayList<>();
         listeTypePrestations = new ArrayList<>();
-        ArrayAdapter<TypeAssujettis> adapterForAssuj = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, listeTypeAssujettis);
-        ArrayAdapter<String> adapterForSexe = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, new String[] {"M", "F"});
-        ArrayAdapter<TypePrestation> adapterForPresta = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, listeTypePrestations);
-        adapterForPresta.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        enquete = new Enquete();
-
-        listeTypeAssujettis.add(new TypeAssujettis(1, "Travailleurs"));
-        listeTypeAssujettis.add(new TypeAssujettis(2, "Employeurs"));
-        listeTypePrestations.add(new TypePrestation(400, "Allocation Familiale"));
-        listeTypePrestations.add(new TypePrestation(310, "Pension de vieillesse"));
 
         //initialisation des composants visuels
         select_assuj = (Spinner)findViewById(R.id.select_assuj);
@@ -58,9 +53,56 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         select_sexe = (Spinner)findViewById(R.id.select_sexe);
         btn_valider = (Button)findViewById(R.id.btn_valider);
 
-        select_assuj.setAdapter(adapterForAssuj);
-        select_presta.setAdapter(adapterForPresta);
+        ServiceHTTP serviceHTTPForAssuj = new ServiceHTTP();
+        serviceHTTPForAssuj.context = this;
+        serviceHTTPForAssuj.execute("http://192.168.6.247:3300/Assujettis/ass/list");
+        serviceHTTPForAssuj.listener = new OnTaskCompleted() {
+            @Override
+            public void onTaskCompleted(String response) {
+                try{
+                    JSONArray jsa = new JSONArray(response);
+                    for (int i = 0; i < jsa.length(); i++) {
+                        JSONObject current = jsa.getJSONObject(i);
+                        if (current.getInt("id_type") > 0 && !current.getString("lib_type").isEmpty()) {
+                            listeTypeAssujettis.add(new TypeAssujettis(current.getInt("id_type"), current.getString("lib_type")));
+                            ArrayAdapter<TypeAssujettis> adapterForAssuj = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_dropdown_item, listeTypeAssujettis);
+                            select_assuj.setAdapter(adapterForAssuj);
+                        }
+                    }
+                }catch (JSONException e){
+
+                }
+            }
+        };
+
+        ServiceHTTP serviceHTTPForPresta = new ServiceHTTP();
+        serviceHTTPForPresta.context = this;
+        serviceHTTPForPresta.execute("http://192.168.6.247:3300/prest/prest/list");
+        serviceHTTPForPresta.listener = new OnTaskCompleted() {
+            @Override
+            public void onTaskCompleted(String response) {
+                try{
+                    JSONArray jsa = new JSONArray(response);
+                    for (int i = 0; i < jsa.length(); i++) {
+                        JSONObject current = jsa.getJSONObject(i);
+                        if (current.getInt("prestation_code") > 0 && !current.getString("prestation_libelle").isEmpty()) {
+                            listeTypePrestations.add(new TypePrestation(current.getInt("prestation_code"), current.getString("prestation_libelle")));
+                            ArrayAdapter<TypePrestation> adapterForPresta = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_dropdown_item, listeTypePrestations);
+                            select_presta.setAdapter(adapterForPresta);
+                        }
+                    }
+                }catch (JSONException e){
+
+                }
+            }
+        };
+
+
+        ArrayAdapter<String> adapterForSexe = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, new String[] {"M", "F"});
         select_sexe.setAdapter(adapterForSexe);
+
+        enquete = new Enquete();
+
 
         select_assuj.setOnItemSelectedListener(this);
         select_presta.setOnItemSelectedListener(this);
@@ -88,7 +130,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         if(parent.getId() == select_assuj.getId()){
-            enquete.setType_assujetti((int) id);
+            enquete.setType_assujetti((int) id + 1);
         }else if(parent.getId() == select_presta.getId()){
             enquete.setType_prestation(listeTypePrestations.get((int)parent.getItemIdAtPosition(position)).getId_typePrestation());
         }else{
@@ -100,4 +142,5 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     public void onNothingSelected(AdapterView<?> parent) {
 
     }
+
 }
