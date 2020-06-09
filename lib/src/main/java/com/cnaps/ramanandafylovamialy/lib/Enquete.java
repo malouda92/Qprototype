@@ -6,20 +6,22 @@ public class Enquete implements Serializable {
 
     private int id_enquete;
     private int type_assujetti;
-    private int type_prestation;
-    private int age;
-    private char sexe;
+    private String matricule;
+    private String type_prestation;
+    private int id_radio;
+    private String rps;
 
     public Enquete(){
 
     }
 
-    public Enquete(int id_enquete, int type_assujetti, int type_prestation, int age, char sexe){
+    public Enquete(int id_enquete, int type_assujetti, String matricule, String type_prestation, int id_radio, String rps){
         this.id_enquete = id_enquete;
         this.type_assujetti = type_assujetti;
+        this.matricule = matricule;
         this.type_prestation = type_prestation;
-        this.age = age;
-        this.sexe = sexe;
+        this.id_radio = id_radio;
+        this.rps = rps;
     }
 
     public int getId_enquete() {
@@ -38,27 +40,35 @@ public class Enquete implements Serializable {
         this.type_assujetti = type_assujetti;
     }
 
-    public int getType_prestation() {
+    public String getType_prestation() {
         return type_prestation;
     }
 
-    public void setType_prestation(int type_prestation) {
+    public void setType_prestation(String type_prestation) {
         this.type_prestation = type_prestation;
     }
 
-    public int getAge() {
-        return age;
+    public int getId_radio() {
+        return id_radio;
     }
 
-    public void setAge(int age) {
-        this.age = age;
+    public void setId_radio(int id_radio) {
+        this.id_radio = id_radio;
     }
 
-    public char getSexe() {
-        return sexe;
+    public String getRps() {
+        return rps;
     }
 
-    public void setSexe(char sexe) {
-        this.sexe = sexe;
+    public void setRps(String rps) {
+        this.rps = rps;
+    }
+
+    public String getMatricule() {
+        return matricule;
+    }
+
+    public void setMatricule(String matricule) {
+        this.matricule = matricule;
     }
 }

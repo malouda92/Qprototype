@@ -16,7 +16,7 @@ import android.widget.Spinner;
 
 import com.cnaps.ramanandafylovamialy.lib.Enquete;
 import com.cnaps.ramanandafylovamialy.lib.OnTaskCompleted;
-import com.cnaps.ramanandafylovamialy.lib.ServiceHTTP;
+import com.cnaps.ramanandafylovamialy.lib.ServiceHTTPGet;
 import com.cnaps.ramanandafylovamialy.lib.TypeAssujettis;
 import com.cnaps.ramanandafylovamialy.lib.TypePrestation;
 
@@ -50,13 +50,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         //initialisation des composants visuels
         select_assuj = findViewById(R.id.select_assuj);
         select_presta = findViewById(R.id.select_prest);
-        text_age = findViewById(R.id.text_age);
+        text_age = findViewById(R.id.text_matricule);
         select_sexe = findViewById(R.id.select_sexe);
         btn_valider = findViewById(R.id.btn_valider);
 
-        ServiceHTTP serviceHTTPForAssuj = new ServiceHTTP(this);
+        ServiceHTTPGet serviceHTTPForAssuj = new ServiceHTTPGet();
         serviceHTTPForAssuj.execute("http://192.168.6.247:3300/Assujettis/ass/list");
-        serviceHTTPForAssuj.listener = new OnTaskCompleted() {
+        serviceHTTPForAssuj.setListener(new OnTaskCompleted() {
             @Override
             public void onTaskCompleted(String response) {
                 try{
@@ -73,19 +73,19 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     Log.e("erreur", e.getMessage());
                 }
             }
-        };
+        });
 
-        ServiceHTTP serviceHTTPForPresta = new ServiceHTTP(this);
+        ServiceHTTPGet serviceHTTPForPresta = new ServiceHTTPGet();
         serviceHTTPForPresta.execute("http://192.168.6.247:3300/prest/prest/list");
-        serviceHTTPForPresta.listener = new OnTaskCompleted() {
+        serviceHTTPForPresta.setListener(new OnTaskCompleted() {
             @Override
             public void onTaskCompleted(String response) {
                 try{
                     JSONArray jsa = new JSONArray(response);
                     for (int i = 0; i < jsa.length(); i++) {
                         JSONObject current = jsa.getJSONObject(i);
-                        if (current.getInt("prestation_code") > 0 && !current.getString("prestation_libelle").isEmpty()) {
-                            listeTypePrestations.add(new TypePrestation(current.getInt("prestation_code"), current.getString("prestation_libelle")));
+                        if (!current.getString("prestation_code").isEmpty() && !current.getString("prestation_libelle").isEmpty()) {
+                            listeTypePrestations.add(new TypePrestation(current.getString("prestation_code"), current.getString("prestation_libelle")));
                             ArrayAdapter<TypePrestation> adapterForPresta = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_dropdown_item, listeTypePrestations);
                             select_presta.setAdapter(adapterForPresta);
                         }
@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     Log.e("erreur", e.getMessage());
                 }
             }
-        };
+        });
 
 
         ArrayAdapter<String> adapterForSexe = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, new String[] {"M", "F"});
@@ -132,8 +132,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             enquete.setType_assujetti((int) id + 1);
         }else if(parent.getId() == select_presta.getId()){
             enquete.setType_prestation(listeTypePrestations.get((int)parent.getItemIdAtPosition(position)).getId_typePrestation());
-        }else{
-            enquete.setSexe(parent.getItemAtPosition(position).toString().charAt(0));
         }
     }
 
